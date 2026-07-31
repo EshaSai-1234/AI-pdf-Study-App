@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF AI & ML Study Assistant - Android App UI</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-viewport">
+        <!-- Device Frame Mockup -->
+        <div class="phone-frame">
+            <!-- Top Status Bar -->
+            <div class="status-bar">
+                <span class="time" id="status-time">10:45</span>
+                <div class="camera-notch"></div>
+                <div class="status-icons">
+                    <i class="fa-solid fa-wifi"></i>
+                    <i class="fa-solid fa-signal"></i>
+                    <i class="fa-solid fa-battery-full"></i>
+                </div>
+            </div>
+
+            <!-- App Top Header -->
+            <header class="app-header">
+                <div class="header-content">
+                    <div class="brand">
+                        <div class="brand-icon">
+                            <i class="fa-solid fa-brain"></i>
+                        </div>
+                        <div>
+                            <h1>PDF AI Assistant</h1>
+                            <p class="subtitle">ChromaDB RAG + TFLite Engine</p>
+                        </div>
+                    </div>
+                    <div class="connection-status" id="api-status-badge">
+                        <span class="status-dot"></span>
+                        <span class="status-text">Backend Connected</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content Screens -->
+            <main class="app-body">
+                <!-- 1. HOME / UPLOAD SCREEN -->
+                <section id="screen-home" class="screen active">
+                    <div class="card hero-card">
+                        <div class="hero-gradient"></div>
+                        <div class="hero-text">
+                            <h2>AI Study App</h2>
+                            <p>Upload any PDF textbook, paper, or notes to generate instant Summaries, RAG Chat, Flashcards & Quizzes.</p>
+                        </div>
+                    </div>
+
+                    <!-- PDF Upload Drop Zone -->
+                    <div class="card upload-card" id="drop-zone">
+                        <input type="file" id="pdf-input" accept="application/pdf" hidden>
+                        <div class="upload-icon">
+                            <i class="fa-solid fa-file-pdf"></i>
+                        </div>
+                        <h3>Upload PDF Document</h3>
+                        <p>Drag & drop your file here or tap to browse</p>
+                        <button class="btn btn-primary" id="btn-browse">
+                            <i class="fa-solid fa-folder-open"></i> Browse Files
+                        </button>
+                    </div>
+
+                    <!-- Server Settings & Status -->
+                    <div class="card status-card">
+                        <div class="card-header">
+                            <i class="fa-solid fa-database"></i>
+                            <h3>ChromaDB Vector Store</h3>
+                        </div>
+                        <div class="status-details" id="status-details">
+                            <div class="status-row">
+                                <span>Active File:</span>
+                                <strong id="doc-filename">sample_ai_lecture.pdf</strong>
+                            </div>
+                            <div class="status-row">
+                                <span>Indexed Chunks:</span>
+                                <strong id="doc-chunks">1 Chunk (ChromaDB)</strong>
+                            </div>
+                            <div class="status-row">
+                                <span>Total Words:</span>
+                                <strong id="doc-words">82 Words</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- On-Device TFLite Card -->
+                    <div class="card tflite-card">
+                        <div class="card-header">
+                            <i class="fa-solid fa-microchip text-warning"></i>
+                            <h3>On-Device TFLite Engine</h3>
+                        </div>
+                        <p>Runs offline quantized neural network feature extraction directly in Kotlin/Android.</p>
+                        <button class="btn btn-outline" id="btn-run-tflite">
+                            <i class="fa-solid fa-bolt"></i> Test TFLite Neural Embeddings
+                        </button>
+                        <div class="tflite-output" id="tflite-output"></div>
+                    </div>
+                </section>
+
+                <!-- 2. SUMMARY SCREEN -->
+                <section id="screen-summary" class="screen">
+                    <div class="screen-title">
+                        <h2><i class="fa-solid fa-wand-magic-sparkles text-accent"></i> AI Summary</h2>
+                        <button class="btn-icon" id="btn-refresh-summary"><i class="fa-solid fa-rotate-right"></i></button>
+                    </div>
+
+                    <!-- Topics Pill Container -->
+                    <div class="topics-container">
+                        <span class="label">Key Topics:</span>
+                        <div class="topics-chips" id="topics-list">
+                            <span class="chip">Machine Learning</span>
+                            <span class="chip">Artificial Intelligence</span>
+                            <span class="chip">ChromaDB</span>
+                            <span class="chip">TensorFlow Lite</span>
+                        </div>
+                    </div>
+
+                    <!-- Stats Row -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <i class="fa-regular fa-clock text-primary"></i>
+                            <div class="stat-value" id="summary-time">1 min</div>
+                            <div class="stat-label">Reading Time</div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fa-solid fa-align-left text-success"></i>
+                            <div class="stat-value" id="summary-words">82</div>
+                            <div class="stat-label">Total Words</div>
+                        </div>
+                    </div>
+
+                    <!-- Executive Summary Box -->
+                    <div class="card summary-box">
+                        <h3><i class="fa-solid fa-book-open"></i> Executive Summary</h3>
+                        <p id="summary-text">Machine learning is a subset of artificial intelligence that allows systems to learn from data, identify patterns, and make automated decisions. ChromaDB serves as a vector database for RAG applications.</p>
+                    </div>
+
+                    <!-- Key Bullet Points -->
+                    <div class="card takeaways-box">
+                        <h3><i class="fa-solid fa-list-check"></i> Key Takeaways</h3>
+                        <ul id="takeaways-list" class="takeaways-list">
+                            <li><i class="fa-solid fa-circle-check"></i> Supervised learning relies on labeled datasets for model training.</li>
+                            <li><i class="fa-solid fa-circle-check"></i> ChromaDB optimizes similarity search for LLM pipelines.</li>
+                            <li><i class="fa-solid fa-circle-check"></i> TensorFlow Lite quantizes weights for fast mobile inference.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <!-- 3. RAG Q&A CHAT SCREEN -->
+                <section id="screen-qa" class="screen">
+                    <div class="screen-title">
+                        <h2><i class="fa-solid fa-comments text-purple"></i> Vector RAG Q&A</h2>
+                    </div>
+
+                    <!-- Quick Suggestions -->
+                    <div class="prompts-scroll">
+                        <button class="prompt-chip" data-prompt="What is ChromaDB used for?">What is ChromaDB?</button>
+                        <button class="prompt-chip" data-prompt="Explain TensorFlow Lite features">TensorFlow Lite?</button>
+                        <button class="prompt-chip" data-prompt="Summarize machine learning notes">Machine Learning?</button>
+                    </div>
+
+                    <!-- Chat Messages List -->
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="message bot-message">
+                            <div class="message-avatar"><i class="fa-solid fa-robot"></i></div>
+                            <div class="message-content">
+                                <p>Hello! I've indexed your PDF into ChromaDB. Ask me any question about your document!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Input Bar -->
+                    <div class="chat-input-bar">
+                        <input type="text" id="chat-input" placeholder="Ask a question from PDF...">
+                        <button id="btn-send-chat" class="btn-send"><i class="fa-solid fa-paper-plane"></i></button>
+                    </div>
+                </section>
+
+                <!-- 4. FLASHCARDS SCREEN -->
+                <section id="screen-flashcards" class="screen">
+                    <div class="screen-title">
+                        <h2><i class="fa-solid fa-layer-group text-purple"></i> 3D Flashcards</h2>
+                        <span class="card-count" id="flashcard-progress">Card 1 of 3</span>
+                    </div>
+
+                    <!-- 3D Flip Card -->
+                    <div class="flashcard-wrapper">
+                        <div class="flashcard" id="flashcard">
+                            <!-- Card Front (Question) -->
+                            <div class="card-face card-front">
+                                <div class="card-badge">QUESTION</div>
+                                <h3 id="card-question">What is the function of ChromaDB in AI pipelines?</h3>
+                                <div class="flip-hint"><i class="fa-solid fa-rotate"></i> Tap card to flip</div>
+                            </div>
+                            <!-- Card Back (Answer) -->
+                            <div class="card-face card-back">
+                                <div class="card-badge badge-success">ANSWER</div>
+                                <p id="card-answer">ChromaDB serves as a vector database optimized for similarity search and retrieval-augmented generation (RAG) applications.</p>
+                                <div class="flip-hint"><i class="fa-solid fa-rotate"></i> Tap card to flip back</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Controls -->
+                    <div class="card-controls">
+                        <button class="btn-icon" id="btn-prev-card"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button class="btn btn-secondary" id="btn-flip-card"><i class="fa-solid fa-repeat"></i> Flip Card</button>
+                        <button class="btn-icon" id="btn-next-card"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                </section>
+
+                <!-- 5. QUIZ SCREEN -->
+                <section id="screen-quiz" class="screen">
+                    <div class="screen-title">
+                        <h2><i class="fa-solid fa-circle-question text-accent"></i> AI Knowledge Quiz</h2>
+                        <span class="card-count" id="quiz-progress">Q 1 of 3</span>
+                    </div>
+
+                    <!-- Quiz Question Card -->
+                    <div class="card quiz-card">
+                        <h3 id="quiz-question-text">Which vector database is optimized for similarity search and RAG applications?</h3>
+                    </div>
+
+                    <!-- Options Container -->
+                    <div class="quiz-options" id="quiz-options">
+                        <button class="quiz-option" data-idx="0">A. ChromaDB</button>
+                        <button class="quiz-option" data-idx="1">B. SQLite Standard</button>
+                        <button class="quiz-option" data-idx="2">C. Memory Cache</button>
+                        <button class="quiz-option" data-idx="3">D. Legacy File Indexer</button>
+                    </div>
+
+                    <!-- Explanation Box -->
+                    <div class="card explanation-box hidden" id="quiz-explanation">
+                        <h4><i class="fa-solid fa-circle-info text-warning"></i> Explanation</h4>
+                        <p id="explanation-text">ChromaDB is specifically designed as a vector store for RAG pipelines.</p>
+                    </div>
+
+                    <button class="btn btn-primary btn-block hidden" id="btn-next-quiz">Next Question</button>
+                </section>
+            </main>
+
+            <!-- Android Bottom Navigation Bar -->
+            <nav class="bottom-nav">
+                <button class="nav-item active" data-target="screen-home">
+                    <i class="fa-solid fa-file-arrow-up"></i>
+                    <span>Upload</span>
+                </button>
+                <button class="nav-item" data-target="screen-summary">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Summary</span>
+                </button>
+                <button class="nav-item" data-target="screen-qa">
+                    <i class="fa-solid fa-comments"></i>
+                    <span>Q&A Chat</span>
+                </button>
+                <button class="nav-item" data-target="screen-flashcards">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span>Cards</span>
+                </button>
+                <button class="nav-item" data-target="screen-quiz">
+                    <i class="fa-solid fa-circle-question"></i>
+                    <span>Quiz</span>
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Quiz Score Modal -->
+    <div class="modal-overlay hidden" id="score-modal">
+        <div class="modal-card">
+            <div class="modal-icon"><i class="fa-solid fa-trophy text-warning"></i></div>
+            <h2>Quiz Complete!</h2>
+            <div class="score-display">
+                <span id="final-score">3</span> / <span id="total-questions">3</span>
+            </div>
+            <p>Great job! You have demonstrated strong comprehension of the document.</p>
+            <button class="btn btn-primary btn-block" id="btn-restart-quiz">Retake Quiz</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
