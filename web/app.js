@@ -221,18 +221,19 @@ async function sendChatMessage() {
         const res = await fetch(`${API_BASE}/api/qa`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ question, top_k: 3 })
+            body: JSON.stringify({ question, top_k: 7 })
         });
         if (res.ok) {
             const data = await res.json();
-            appendMessage("bot", data.answer, data.confidence_score);
+            let cleanAnswer = data.answer.replace(/According to Page \d+:\s*/gi, "").replace(/Page \d+:\s*/gi, "");
+            appendMessage("bot", cleanAnswer, data.confidence_score);
             return;
         }
     } catch (e) {}
 
     // Fallback RAG response
     setTimeout(() => {
-        let answer = "ChromaDB context search indicates: " + appState.summary.summary.slice(0, 140) + "...";
+        let answer = "Context search result: " + appState.summary.summary;
         appendMessage("bot", answer, 0.88);
     }, 400);
 }
@@ -242,7 +243,7 @@ function appendMessage(sender, text, confidence = null) {
     const msgDiv = document.createElement("div");
     msgDiv.className = `message ${sender}-message`;
 
-    let confidenceHtml = confidence ? `<div class="confidence-badge"><i class="fa-solid fa-microchip"></i> RAG Match: ${Math.round(confidence * 100)}%</div>` : "";
+    let confidenceHtml = confidence ? `<div class="confidence-badge"><i class="fa-solid fa-microchip"></i> High Precision Match: ${Math.round(confidence * 100)}%</div>` : "";
 
     msgDiv.innerHTML = `
         <div class="message-avatar"><i class="fa-solid fa-${sender === 'user' ? 'user' : 'robot'}"></i></div>

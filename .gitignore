@@ -1,4 +1,4 @@
-# Android/Gradle
+# Android / Gradle
 .gradle/
 /build/
 */build/
@@ -7,88 +7,65 @@
 .externalNativeBuild/
 .cxx/
 /local.properties
-/.idea/
-.DS_Store
-
-# Kotlin/Java class files
-*.class
+.idea/
+*.iml
 *.apk
 *.ap_
-
-# IntelliJ
-*.iml
-.idea/
-.idea/*
-
-# Android Studio
-*.apk
-*.ap_ 
 *.hprof
-
-# Crashlytics
-crashlytics-
-
-# Generated files
-*.log
-*.tmp
-*.temp
-*.orig
 
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
-env/
-venv/
+*.so
+.env
 .venv/
-.python-version
-pip-wheel-metadata/
+venv/
+env/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
 
-# Backend dependencies
-backend/__pycache__/
-backend/*.py[cod]
+# Vector Store & Cache Databases
+chroma_db/
+*.sqlite3
+*.db
+.chroma/
 
-# Jupyter
-.ipynb_checkpoints/
+# Logs & Temporary Files
+*.log
+*.tmp
+*.temp
+*.swp
+*.swo
+*.bak
 
-# VS Code
+# VS Code / IDEs
 .vscode/
 .history/
+.DS_Store
+Thumbs.db
 
-# Node / web
+# Web / Node
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-/dist/
-/build/
 
-# Mac
-.DS_Store
-
-# PDF / sample artifacts
-*.pdf
-*.png
-*.jpg
-*.jpeg
-*.svg
-
-# Temporary files
-*.swp
-*.swo
-*.tmp
-*.bak
-*.backup
-
-# Python virtual environments
-.pytest_cache/
-
-# Generated Sphinx docs
-docs/_build/
-
-# Misc
-*.class
-*.jar
-*.war
-*.ear
+# Crashlytics & Build Artifacts
+crashlytics-
+*.orig

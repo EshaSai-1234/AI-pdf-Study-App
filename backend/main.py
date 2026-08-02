@@ -34,7 +34,7 @@ current_pdf_state = {
 
 class QARequest(BaseModel):
     question: str
-    top_k: Optional[int] = 5
+    top_k: Optional[int] = 7
 
 class SimilarityRequest(BaseModel):
     text1: str
@@ -67,7 +67,7 @@ async def upload_pdf(file: UploadFile = File(...)):
             raise HTTPException(status_code=400, detail="Could not extract readable text from PDF.")
 
         # Sentence-boundary semantic chunking
-        chunks = PDFProcessor.chunk_pages_semantically(pages_data, max_chars=600, overlap_chars=150)
+        chunks = PDFProcessor.chunk_pages_semantically(pages_data, max_chars=800, overlap_chars=200)
         
         # Hybrid Indexing (Vector + BM25)
         global vector_store
@@ -105,11 +105,11 @@ def get_summary():
 
 @app.post("/api/qa")
 def ask_question(request: QARequest):
-    """Perform Hybrid RAG search (ChromaDB + BM25) and synthesize page-cited answer."""
+    """Perform Hybrid RAG search (ChromaDB + BM25) and synthesize accurate answer without page number references."""
     if not current_pdf_state["pages_data"]:
         raise HTTPException(status_code=400, detail="No PDF document uploaded yet.")
 
-    retrieved_matches = vector_store.query_hybrid(request.question, n_results=request.top_k or 5)
+    retrieved_matches = vector_store.query_hybrid(request.question, n_results=request.top_k or 7)
     result = AIGenerator.answer_question(request.question, retrieved_matches)
     return result
 

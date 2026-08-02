@@ -44,10 +44,17 @@ class VectorStoreManager:
         )
 
     def _bm25_score(self, query: str, document: str) -> float:
-        """Calculate BM25 term overlap score."""
-        q_words = re.findall(r'\b\w{3,}\b', query.lower())
-        d_words = re.findall(r'\b\w{3,}\b', document.lower())
-        if not q_words or not d_words:
+        """Calculate BM25 term overlap score supporting short terms like AI, ML, 5G, numbers."""
+        q_words = re.findall(r'\b[a-zA-Z0-9]{1,}\b', query.lower())
+        d_words = re.findall(r'\b[a-zA-Z0-9]{1,}\b', document.lower())
+        
+        # Exclude common noisy stopwords
+        stopwords = {"the", "is", "at", "which", "on", "a", "an", "and", "or", "in", "to", "for", "of", "with", "what", "how", "why", "who", "where", "can", "does", "do", "are", "it"}
+        q_filtered = [w for w in q_words if w not in stopwords]
+        if not q_filtered:
+            q_filtered = q_words
+
+        if not q_filtered or not d_words:
             return 0.0
 
         doc_len = len(d_words)
@@ -56,20 +63,38 @@ class VectorStoreManager:
         b = 0.75
 
         score = 0.0
-        for word in set(q_words):
+        for word in set(q_filtered):
             count = d_words.count(word)
             if count > 0:
                 tf = (count * (k1 + 1)) / (count + k1 * (1 - b + b * (doc_len / avg_len)))
                 score += tf
 
+        # Boost exact multi-word phrase match
+        query_strip = query.strip().lower()
+        doc_lower = document.lower()
+        if len(query_strip) > 4 and query_strip in doc_lower:
+            score += 3.0
+
+        # Boost key phrase matches (e.g. "multimodal ai models" or "popular multimodal")
+        words_in_q = [w for w in q_filtered if len(w) > 3]
+        if len(words_in_q) >= 2:
+            bigrams = [" ".join(words_in_q[i:i+2]) for i in range(len(words_in_q)-1)]
+            for bg in bigrams:
+                if bg in doc_lower:
+                    score += 1.5
+
+        # Boost chunks containing numbered item lists when query asks about models/types/list
+        if any(kw in query_strip for kw in ["model", "type", "popular", "list", "example"]) and re.search(r'\d+\.\s+[A-Z]', document):
+            score += 2.0
+
         return score
 
     def query_hybrid(self, query_text: str, n_results: int = 5) -> List[Dict[str, Any]]:
-        """Perform Hybrid RAG Retrieval (ChromaDB Vector + BM25 Keyword Scoring)."""
+        """Perform Hybrid RAG Retrieval (ChromaDB Dense Vector + Sparse BM25 Keyword Scoring + RRF)."""
         if self.collection.count() == 0:
             return []
 
-        actual_n = min(n_results * 2, self.collection.count())
+        actual_n = min(max(n_results * 3, 10), self.collection.count())
         vector_results = self.collection.query(
             query_texts=[query_text],
             n_results=actual_n
@@ -93,7 +118,7 @@ class VectorStoreManager:
                 bm25_score = self._bm25_score(query_text, text)
                 
                 # Hybrid RRF score
-                hybrid_score = round((vector_score * 0.6) + (min(1.0, bm25_score * 0.3) * 0.4), 4)
+                hybrid_score = round((vector_score * 0.5) + (min(1.0, bm25_score * 0.35) * 0.5), 4)
 
                 matches.append({
                     "id": ids[i] if i < len(ids) else f"match_{i}",
@@ -107,3 +132,7 @@ class VectorStoreManager:
         # Sort matches by hybrid score descending
         matches.sort(key=lambda x: x["score"], reverse=True)
         return matches[:n_results]
+
+    def query_similar(self, query_text: str, n_results: int = 5) -> List[Dict[str, Any]]:
+        """Helper alias for query_hybrid to maintain backward compatibility."""
+        return self.query_hybrid(query_text, n_results=n_results)

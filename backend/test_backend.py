@@ -14,11 +14,12 @@ def test_full_pipeline():
         pdf_bytes = f.read()
 
     print("\n--- 2. PDF Extraction & Chunking ---")
+    pages_data = PDFProcessor.extract_pages_from_bytes(pdf_bytes)
     extracted_text = PDFProcessor.extract_text_from_bytes(pdf_bytes)
-    print(f"Extracted Length: {len(extracted_text)} chars")
+    print(f"Extracted Pages: {len(pages_data)}, Total Length: {len(extracted_text)} chars")
     print(f"Extracted Text Preview:\n{extracted_text[:180]}...")
 
-    chunks = PDFProcessor.chunk_text(extracted_text, chunk_size=40, overlap=10)
+    chunks = PDFProcessor.chunk_pages_semantically(pages_data, max_chars=400, overlap_chars=100)
     print(f"Generated {len(chunks)} chunks.")
 
     print("\n--- 3. ChromaDB Vector Store Indexing & Search ---")
@@ -26,25 +27,25 @@ def test_full_pipeline():
     vs.add_chunks(chunks)
     
     query = "What is ChromaDB used for?"
-    matches = vs.query_similar(query, n_results=2)
+    matches = vs.query_similar(query, n_results=3)
     print(f"Query: '{query}'")
     for m in matches:
         print(f" -> Match (Score {m['score']}): {m['text']}")
 
     print("\n--- 4. AI Generator (Summary, Q&A, Flashcards, Quiz) ---")
-    summary = AIGenerator.generate_summary(extracted_text)
+    summary = AIGenerator.generate_summary(pages_data)
     print(f"Summary: {summary['summary']}")
     print(f"Topics: {summary['topics']}")
 
     qa_res = AIGenerator.answer_question("What is TensorFlow Lite?", matches)
     print(f"Q&A Answer: {qa_res['answer']}")
 
-    cards = AIGenerator.generate_flashcards(extracted_text, count=2)
+    cards = AIGenerator.generate_flashcards(pages_data, count=2)
     print(f"Flashcards Generated: {len(cards)}")
     for c in cards:
         print(f" [Flashcard {c['id']}] Q: {c['question']} | A: {c['answer']}")
 
-    quiz = AIGenerator.generate_quiz(extracted_text, count=2)
+    quiz = AIGenerator.generate_quiz(pages_data, count=2)
     print(f"Quiz Questions Generated: {len(quiz)}")
     for q in quiz:
         print(f" [Quiz {q['id']}] Question: {q['question']}")

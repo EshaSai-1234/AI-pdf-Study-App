@@ -1,67 +1,85 @@
-# AI & ML PDF Study Assistant (Kotlin + FastAPI + ChromaDB + TFLite)
+# AI & ML PDF Study Assistant (Kotlin + FastAPI + ChromaDB + TFLite + Web)
 
-A full-stack Android & Python application that parses uploaded PDF documents and provides interactive **Summaries**, **Vector RAG Q&A**, **Flashcards**, and **Multiple-Choice Quizzes** using **Kotlin Jetpack Compose**, **FastAPI**, **ChromaDB**, and **TensorFlow Lite (TFLite)**.
+A high-precision, full-stack PDF AI Assistant application that parses uploaded PDF documents and provides interactive **Summaries**, **High-Precision RAG Q&A**, **Flashcards**, and **Multiple-Choice Quizzes** using **Kotlin Jetpack Compose**, **FastAPI**, **ChromaDB**, **TensorFlow Lite (TFLite)**, and modern **Web (HTML/CSS/JS)**.
 
 ---
 
 ## 🏗️ Architecture & Technology Stack
 
 ```
-                              ┌─────────────────────────────────────────┐
-                              │           Android Kotlin App            │
-                              │         (Jetpack Compose UI)            │
-                              └────────────────────┬────────────────────┘
-                                                   │
-                                      Retrofit REST API Requests
-                                                   │
-                                                   ▼
+                               ┌─────────────────────────────────────────┐
+                               │       Android App / Web Frontend        │
+                               │   (Jetpack Compose UI & Glassmorphism)  │
+                               └────────────────────┬────────────────────┘
+                                                    │
+                                       Retrofit REST API Requests
+                                                    │
+                                                    ▼
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │                                Python FastAPI Backend Server                           │
-├──────────────────────────┬──────────────────────────┬──────────────────────────────────┤
-│   PDF Parser & Chunking  │    ChromaDB Vector Store │   AI NLP Engine & TFLite         │
-│   (PyPDF Processor)      │   (Embedding & RAG Q&A) │   (Summaries, Cards & Quizzes)   │
-└──────────────────────────┴──────────────────────────┴──────────────────────────────────┘
+│ ├──────────────────────────┬──────────────────────────┬──────────────────────────────┤ │
+│ │  PyPDF Structural Engine │  ChromaDB + BM25 RAG     │  High-Precision AI Generator │ │
+│ │  & Semantic Chunking     │  Hybrid Vector Store     │  (LLM & Standalone RAG)      │ │
+│ └──────────────────────────┴──────────────────────────┴──────────────────────────────┘ │
+└────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 - **Android Client**: Kotlin, Jetpack Compose (Material 3), Retrofit2, OkHttp3, Coroutines, `org.tensorflow:tensorflow-lite` for on-device ML feature extraction.
+- **Web Client**: HTML5, Vanilla CSS3 (Glassmorphic Design), Modern JavaScript (Fetch API, RAG UI).
 - **Backend Server**: Python 3.10+, FastAPI, Uvicorn.
-- **Vector Database**: ChromaDB for embedding storage and semantic similarity search.
-- **On-Device & Edge ML**: TensorFlow Lite (TFLite) for text embedding calculations and local similarity scoring.
+- **Vector Store & Retrieval**: ChromaDB + BM25 Sparse Keyword Search with Reciprocal Rank Fusion (RRF) and exact-phrase boosting.
+- **AI Answer Engine**: Supports **Google Gemini API** (`google-genai`), **OpenAI API**, and a standalone **Multi-Sentence RAG Synthesizer** (offline / un-keyed) producing clean answers without page citation clutter.
+- **Edge ML**: TensorFlow Lite (TFLite) for text embedding calculations and local similarity scoring.
+
+---
+
+## 📊 Evaluation Metrics
+
+The system evaluates RAG performance across two primary dimensions: **Retrieval Accuracy** and **Answer Generation Quality**.
+
+### 1. Retrieval Metrics
+| Metric | Description | Target Benchmark |
+| :--- | :--- | :--- |
+| **Hit Rate @ K** | Percentage of queries where at least one ground-truth passage appears in top-K matches. | `> 95%` (K=7) |
+| **MRR (Mean Reciprocal Rank)** | Evaluates how close to the top position the first relevant chunk appears ($MRR = \frac{1}{|Q|} \sum \frac{1}{\text{rank}_i}$). | `> 0.88` |
+| **Precision @ K** | Ratio of relevant retrieved passages to total retrieved passages. | `> 0.80` |
+| **NDCG @ K** | Normalized Discounted Cumulative Gain measuring rank position and relevance decay. | `> 0.90` |
+
+### 2. Answer Generation & Quality Metrics
+| Metric | Description | Target Benchmark |
+| :--- | :--- | :--- |
+| **Faithfulness / Groundedness** | Degree to which the answer contains ONLY facts supported by retrieved PDF context (0 hallucination). | `99.2%` |
+| **Answer Relevance** | Cosine similarity between query intent and generated answer summary. | `> 0.91` |
+| **ROUGE-L / BLEU-4** | N-gram and longest common subsequence overlap against gold standard reference answers. | `ROUGE-L > 0.72` |
+| **Response Latency** | End-to-end processing time from question submission to answer rendering. | `< 450 ms` (Local RAG) |
 
 ---
 
 ## 📁 Repository Structure
 
 ```
-App/
+AI pdf Study App/
 ├── backend/
-│   ├── main.py               # FastAPI entrypoint with CORS & routes
-│   ├── pdf_processor.py      # PDF text extraction & semantic chunking
-│   ├── vector_store.py       # ChromaDB vector database manager
-│   ├── ai_generator.py       # Summarizer, RAG Q&A, Flashcards & Quiz engine
+│   ├── main.py               # FastAPI entrypoint with CORS & API routes
+│   ├── pdf_processor.py      # Structural PDF parser & semantic paragraph chunker
+│   ├── vector_store.py       # Hybrid Vector Store (ChromaDB + BM25 + RRF)
+│   ├── ai_generator.py       # High-Precision Q&A Synthesizer, Flashcards & Quiz engine
 │   ├── tflite_inference.py   # TensorFlow Lite Python inference helper
-│   ├── create_sample_pdf.py  # Sample PDF builder for testing
-│   ├── test_backend.py       # Full pipeline test script
-│   └── requirements.txt      # Python dependencies
+│   ├── create_sample_pdf.py  # Sample PDF generator for automated testing
+│   ├── test_backend.py       # Comprehensive backend test suite
+│   └── requirements.txt      # Python backend dependencies
+│
+├── web/
+│   ├── index.html            # Web interface HTML5 structure
+│   ├── styles.css            # Glassmorphic Dark Design System
+│   └── app.js                # Frontend logic & RAG chat handler
 │
 ├── android/
 │   ├── build.gradle.kts      # Project-level Gradle build
-│   ├── settings.gradle.kts   # Project settings
-│   └── app/
-│       ├── build.gradle.kts  # App-level Gradle build (Compose, Retrofit, TFLite)
-│       └── src/main/
-│           ├── AndroidManifest.xml
-│           └── java/com/pdfai/app/
-│               ├── MainActivity.kt
-│               ├── data/
-│               │   ├── api/          # RetrofitClient & PdfAiApiService
-│               │   ├── model/        # Kotlin DTO Data Models
-│               │   └── tflite/       # TFLiteManager (On-Device ML)
-│               └── ui/
-│                   ├── components/   # BottomNavBar & Navigation
-│                   ├── screens/      # HomeScreen, SummaryScreen, QaScreen, FlashcardsScreen, QuizScreen
-│                   └── theme/        # Glassmorphic Dark Design System
-└── README.md
+│   └── app/                  # Android Jetpack Compose app source
+│
+├── .gitignore                # Production ignore settings
+└── README.md                 # Project documentation
 ```
 
 ---
@@ -70,7 +88,7 @@ App/
 
 ### 1. Running the FastAPI Backend
 
-Navigate to the `backend/` folder, install requirements, and run Uvicorn:
+Navigate to `backend/`, install dependencies, and launch Uvicorn:
 
 ```bash
 cd backend
@@ -78,41 +96,34 @@ pip install -r requirements.txt
 python main.py
 ```
 
-The FastAPI server will start at `http://localhost:8000`. You can inspect interactive API docs at `http://localhost:8000/docs`.
+The FastAPI server starts at `http://127.0.0.1:8000`. Interactive Swagger documentation is available at `http://127.0.0.1:8000/docs`.
 
-To test the backend locally without running a web server:
+### 2. Optional API Key Configuration
+To enable LLM answer generation via Gemini or OpenAI, set environment variables before running Uvicorn:
 ```bash
-python test_backend.py
+# Optional: Set Gemini API key
+export GEMINI_API_KEY="your-gemini-api-key"
+
+# Optional: Set OpenAI API key
+export OPENAI_API_KEY="your-openai-api-key"
+```
+*(If no API keys are provided, the system automatically uses its standalone Multi-Sentence RAG Synthesizer).*
+
+### 3. Automated Verification Tests
+Run the automated test suite to verify extraction, indexing, search ranking, and answer synthesis:
+```bash
+python backend/test_backend.py
 ```
 
-### 2. API Endpoints
+---
+
+## 📡 API Endpoints
 
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `POST` | `/api/upload` | Upload PDF file, extract text, chunk, and index into ChromaDB. |
-| `GET` | `/api/summary` | Generate executive summary, key insights, reading time, and topics. |
-| `POST` | `/api/qa` | Perform RAG search on ChromaDB context & answer questions. |
-| `GET` | `/api/flashcards` | Generate interactive flashcard deck (Q&A pairs). |
-| `GET` | `/api/quiz` | Generate multiple-choice quiz questions with explanations. |
-| `POST` | `/api/tflite/similarity` | Compute similarity using TFLite text embedding model. |
-
----
-
-### 3. Running the Android Application
-
-1. Open the `android/` directory in **Android Studio (Hedgehog or newer)**.
-2. Build and Sync Gradle project (`Sync Project with Gradle Files`).
-3. Run the app on an Android Emulator or connected Physical Device (Android 7.0+ / API 24+).
-4. **Connecting to Local Backend**:
-   - On **Android Emulator**, use `http://10.0.2.2:8000` (pre-configured in `RetrofitClient`).
-   - On a **Physical Device**, enter your machine's local IP address (e.g. `http://192.168.1.100:8000`) in the server endpoint setting on the app's home screen.
-
----
-
-## 📱 App Features & Screens
-
-1. **PDF Upload & Indexing (`HomeScreen.kt`)**: Select any PDF document from device storage, upload to FastAPI, view chunk counts, and execute local TFLite neural model similarity tests.
-2. **AI Summary (`SummaryScreen.kt`)**: Displays reading time, total word count, topic tags, high-density executive summary, and key takeaways.
-3. **Document Q&A (`QaScreen.kt`)**: Interactive chat view powered by ChromaDB RAG vector search, featuring source text references and confidence indicators.
-4. **Flashcards (`FlashcardsScreen.kt`)**: Animated 3D flip card study deck with difficulty tags and mastery progress tracking.
-5. **Interactive Quiz (`QuizScreen.kt`)**: Test comprehension with multiple-choice questions, immediate correct/incorrect option highlights, explanation cards, and final score summary.
+| `POST` | `/api/upload` | Upload PDF file, extract text, chunk semantically, and index into Hybrid Vector Store. |
+| `GET` | `/api/summary` | Generate executive summary, key insights, reading time, and topic tags. |
+| `POST` | `/api/qa` | Perform Hybrid RAG search & synthesize high-precision answer (no page number clutter). |
+| `GET` | `/api/flashcards` | Generate interactive flashcard deck with key concepts & definitions. |
+| `GET` | `/api/quiz` | Generate multiple-choice quiz questions with answer options & explanations. |
+| `POST` | `/api/tflite/similarity` | Compute neural embedding similarity via TFLite engine. |
